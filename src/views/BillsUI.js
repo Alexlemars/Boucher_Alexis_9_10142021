@@ -19,9 +19,15 @@ const row = (bill) => {
     `)
   }
 
-const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
-}
+//correction du bug bills (ajout du data.sort pour que les notes s'affichent dans l'odre décroissant)
+  const rows = (data) => {
+    if (data && data.length) {
+      data.sort( (a, b) => ((a.date < b.date) ? 1 : -1));
+    }
+    return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+  }
+
+
 
 export default ({ data: bills, loading, error }) => {
   
