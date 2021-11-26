@@ -145,6 +145,8 @@ export default class {
       this.counter ++
     }
 
+
+    // Corection du bug du dashboard( problemes de l'ecouteur d'evenement)
     bills.forEach(bill => {
       $(`#status-bills-container${this.index} > #open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
     })
