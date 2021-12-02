@@ -3,7 +3,8 @@ import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
 import { localStorageMock } from "../__mocks__/localStorage.js"
 import { ROUTES } from "../constants/routes"
-
+import firebase from "../__mocks__/firebase"
+import BillsUI from "../views/BillsUI.js"
 window.alert = jest.fn();
 
 describe("Given I am connected as an employee", () => {
@@ -162,4 +163,56 @@ describe("Given I am connected as an employee", () => {
     })   
   })
 })
+
+
+
+
+
+// test d'intégration POST
+describe("Given I am a user connected as employee", () => {
+  describe("When I send a new Bill", () => {
+    test("fetches bills from mock API POST", async () => {
+      const getSpy = jest.spyOn(firebase, "post")
+
+      const newBill = {
+        "id": "qcCK3SzECmaZAGReggyrgy",
+         "status": "refused",
+         "pct": 20,
+         "amount": 200,
+         "email": "a@a",
+         "name": "test33",
+         "vat": "40",
+         "fileName": "preview-facture-free-201801-pdf-1.jpg",
+         "date": "2002-02-02",
+         "commentAdmin": "pas la bonne facture",
+         "commentary": "test2",
+         "type": "Restaurants et bars",
+         "fileUrl": "https://firebasestorage.googleapis.com/v0/b/billable-677b6.a…f-1.jpg?alt=media&token=4df6ed2c-12c8-42a2-b013-346c1346f732"
+       };
+
+      const bills = await firebase.post(newBill)
+      expect(getSpy).toHaveBeenCalledTimes(1)
+      expect(bills.data.length).toBe(5)
+    })
+    test("fetches bills from an API and fails with 404 message error", async () => {
+      firebase.post.mockImplementationOnce(() =>
+        Promise.reject(new Error("Erreur 404"))
+      )
+      const html = BillsUI({ error: "Erreur 404" })
+      document.body.innerHTML = html
+      const message = await screen.getByText(/Erreur 404/)
+      expect(message).toBeTruthy()
+    })
+    test("fetches messages from an API and fails with 500 message error", async () => {
+      firebase.post.mockImplementationOnce(() =>
+        Promise.reject(new Error("Erreur 404"))
+      )
+      const html = BillsUI({ error: "Erreur 500" })
+      document.body.innerHTML = html
+      const message = await screen.getByText(/Erreur 500/)
+      expect(message).toBeTruthy()
+    })
+  })
+})
+
 
