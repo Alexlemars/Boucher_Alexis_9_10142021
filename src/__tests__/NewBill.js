@@ -1,7 +1,10 @@
-import { screen } from "@testing-library/dom"
+import { screen,fireEvent} from "@testing-library/dom"
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
+import { localStorageMock } from "../__mocks__/localStorage.js"
+import { ROUTES } from "../constants/routes"
 
+window.alert = jest.fn();
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
@@ -42,7 +45,121 @@ describe("Given I am connected as an employee", () => {
       expect(screen.getByTestId('file')).toBeTruthy()
     })
 
-    
+
+
+
+
+    describe("When I add an image file as bill proof", () => {
+      test("Then this new file should have been changed in the input", () => {
+        Object.defineProperty(window, 'localStorage', { 
+          value: localStorageMock 
+        })
+        window.localStorage.setItem('user', JSON.stringify({
+          type: 'Employee'
+        }))
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+
+        const html = NewBillUI()
+        document.body.innerHTML = html
+  
+        const newBills = new NewBill({
+          document, 
+          onNavigate, 
+          firestore: null,  
+          localStorage: window.localStorage
+        })
+  
+        const handleChangeFile = jest.fn(newBills.handleChangeFile)
+        const fileInput = screen.getByTestId('file')
+
+
+        fileInput.addEventListener("change", handleChangeFile)
+        fireEvent.change(fileInput, { 
+          target: { 
+            files: [new File(['bill.png'], 'bill.png', {type: 'image/png'})]
+          } 
+        })
+  
+        expect(handleChangeFile).toHaveBeenCalled()
+        expect(fileInput.files[0].name).toBe('bill.png')
+      })
+    })
+
+
+
+    describe("When I add an non-image file as bill proof", () => {
+      test("Then throw an alert", () => {
+        Object.defineProperty(window, 'localStorage', { 
+          value: localStorageMock 
+        })
+        window.localStorage.setItem('user', JSON.stringify({
+          type: 'Employee'
+        }))
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+
+        const html = NewBillUI()
+        document.body.innerHTML = html
+  
+        const newBills = new NewBill({
+          document, 
+          onNavigate, 
+          firestore: null,  
+          localStorage: window.localStorage
+        })
+
+        const handleChangeFile = jest.fn(newBills.handleChangeFile)
+        const fileInput = screen.getByTestId('file')
+  
+        fileInput.addEventListener("change", handleChangeFile)
+        fireEvent.change(fileInput, { 
+          target: { 
+            files: [new File(['video.mp4'], 'video.mp4', {type: 'video/mp4'})]
+          } 
+        })
+  
+        expect(handleChangeFile).toHaveBeenCalled()
+        expect(window.alert).toHaveBeenCalled()
+      })
+    })
+
+
+
+
+    describe("When I Submit form", () => {
+      test("Then, I should be sent on Bills page", () => {
+        Object.defineProperty(window, 'localStorage', { 
+          value: localStorageMock 
+        })
+        window.localStorage.setItem('user', JSON.stringify({
+          type: 'Employee'
+        }))
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+        const html = NewBillUI()
+        document.body.innerHTML = html
+
+        const newBills = new NewBill({
+          document, 
+          onNavigate, 
+          firestore: null, 
+          localStorage: window.localStorage
+        })
+
+        const handleSubmit = jest.fn(newBills.handleSubmit)
+        const newBillForm = screen.getByTestId('form-new-bill')
+        newBillForm.addEventListener("submit", handleSubmit)
+
+        fireEvent.submit(newBillForm)
+
+        expect(handleSubmit).toHaveBeenCalled()
+        expect(screen.getAllByText('Mes notes de frais')).toBeTruthy()
+      })
+    })   
   })
 })
 
