@@ -12,7 +12,7 @@ import Firestore from "../app/Firestore"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
-
+    
     
     test("Then bill icon in vertical layout should be highlighted", () => {
       const html = BillsUI({ data: []})

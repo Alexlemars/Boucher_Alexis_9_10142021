@@ -150,7 +150,6 @@ export default class {
     bills.forEach(bill => {
       $(`#status-bills-container${this.index} > #open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
     })
-
     return bills
 
   }
